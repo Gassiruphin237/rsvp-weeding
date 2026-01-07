@@ -47,7 +47,7 @@ export default function Guest() {
     }
 
     try {
-      const res = await fetch("https://weeding-backend-85v1.onrender.com/api/guests", {
+      const res = await fetch("https://weeding-backend.vercel.app/api/guests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

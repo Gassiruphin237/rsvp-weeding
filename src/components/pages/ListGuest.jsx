@@ -18,10 +18,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Trash2, MessageCircle, RefreshCw, FileText } from "lucide-react"
+import {
+  Trash2,
+  MessageCircle,
+  RefreshCw,
+  FileText,
+  Upload,
+} from "lucide-react"
 import { toast } from "sonner"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import * as XLSX from "xlsx"
+
+import ImportGuestsModal from "@/components/ImportGuestsModal"
 
 export default function ListGuests() {
   const [guests, setGuests] = useState([])
@@ -29,15 +38,24 @@ export default function ListGuests() {
   const [filter, setFilter] = useState("all")
   const [loading, setLoading] = useState(false)
 
+  // PAGINATION
+  const [currentPage, setCurrentPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(5)
+
+  // IMPORT XLS
+  const [importOpen, setImportOpen] = useState(false)
+  const [importGuests, setImportGuests] = useState([])
+
+  // ================= FETCH =================
   const fetchGuests = async () => {
     try {
       setLoading(true)
-      const res = await fetch("https://weeding-backend-85v1.onrender.com/api/guests")
+      const res = await fetch("https://weeding-backend.vercel.app/api/guests")
       const data = await res.json()
       setGuests(data.data || [])
-    } catch (err) {
+    } catch {
       toast.error("Erreur", {
-        description: "Impossible de charger la liste des invités",
+        description: "Impossible de charger les invités",
       })
     } finally {
       setLoading(false)
@@ -48,11 +66,12 @@ export default function ListGuests() {
     fetchGuests()
   }, [])
 
+  // ================= FILTER =================
   const filteredGuests = useMemo(() => {
     return guests.filter(g => {
       const matchSearch =
-        g.name.toLowerCase().includes(search.toLowerCase()) ||
-        g.phone.includes(search)
+        (g.name || "").toLowerCase().includes(search.toLowerCase()) ||
+        (g.phone || "").includes(search)
 
       const matchFilter =
         filter === "all" ||
@@ -63,105 +82,204 @@ export default function ListGuests() {
     })
   }, [guests, search, filter])
 
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, filter, rowsPerPage])
+
+  // ================= PAGINATION =================
+  const totalPages = Math.ceil(filteredGuests.length / rowsPerPage)
+
+  const paginatedGuests = useMemo(() => {
+    const start = (currentPage - 1) * rowsPerPage
+    return filteredGuests.slice(start, start + rowsPerPage)
+  }, [filteredGuests, currentPage, rowsPerPage])
+
+  // ================= EXPORT PDF =================
   const exportPDF = () => {
     const doc = new jsPDF()
 
     doc.setFontSize(18)
-    doc.text(
-      "Liste des invités (Michelle & Patrick)",
-      105,
-      20,
-      { align: "center" }
-    )
-
-    doc.setFontSize(12)
-    doc.text(
-      `Total : ${filteredGuests.length} invité(s)`,
-      105,
-      28,
-      { align: "center" }
-    )
-
-    const tableData = filteredGuests.map(g => [
-      g.name,
-      g.phone,
-      g.is_attending ? "Présent" : "Absent",
-      g.guests_count,
-      new Date(g.created_at).toLocaleDateString(),
-    ])
-
-    autoTable(doc, {
-      startY: 35,
-      head: [["Nom", "Téléphone", "Présence", "Personnes", "Date"]],
-      body: tableData,
-      styles: { halign: "center" },
-      headStyles: { fillColor: [22, 163, 74] }, 
+    doc.text("Liste des invités (Michelle & Patrick)", 105, 20, {
+      align: "center",
     })
 
-    doc.save("liste-invites-michelle-patrick.pdf")
+    autoTable(doc, {
+      startY: 30,
+      head: [["Nom", "Téléphone", "Présence", "Personnes", "Date"]],
+      body: filteredGuests.map(g => [
+        g.name,
+        g.phone,
+        g.is_attending ? "Présent" : "Absent",
+        g.guests_count,
+        new Date(g.created_at).toLocaleDateString(),
+      ]),
+    })
+
+    doc.save("liste-invites.pdf")
   }
 
-  return (
-    <div className="min-h-screen bg-neutral-100 flex flex-col items-center py-10 px-4">
-      {/* TITRE */}
-      <h1 className="text-4xl font-serif font-semibold text-gray-900 mb-2 text-center">
-        Liste des invités
-      </h1>
-      <p className="text-lg text-gray-500 mb-8 text-center">
-        Michelle & Patrick
-      </p>
+  // ================= IMPORT XLS =================
+  const handleXlsFile = e => {
+    const file = e.target.files[0]
+    if (!file) return
 
-      {/* CARD */}
+    const reader = new FileReader()
+
+    reader.onload = evt => {
+      const data = new Uint8Array(evt.target.result)
+      const workbook = XLSX.read(data, { type: "array" })
+      const sheet = workbook.Sheets[workbook.SheetNames[0]]
+      const json = XLSX.utils.sheet_to_json(sheet)
+
+      const parsed = json.map((row, index) => ({
+        id: index,
+        name: row.Nom || "",
+        phone: String(row.Telephone || ""),
+        guests_count: Number(row.Personnes || 1),
+        is_attending: true,
+        checked: true,
+        duplicate: guests.some(
+          g =>
+            g.phone === String(row.Telephone || "") ||
+            g.name?.toLowerCase() ===
+              String(row.Nom || "").toLowerCase()
+        ),
+      }))
+
+      setImportGuests(parsed)
+      setImportOpen(true)
+    }
+
+    reader.readAsArrayBuffer(file)
+  }
+
+  const toggleImportGuest = id => {
+    setImportGuests(prev =>
+      prev.map(g =>
+        g.id === id ? { ...g, checked: !g.checked } : g
+      )
+    )
+  }
+
+  const importSelectedGuests = async () => {
+    const selected = importGuests.filter(
+      g => g.checked && !g.duplicate
+    )
+
+    if (selected.length === 0) {
+      toast.warning("Aucun invité valide à importer")
+      return
+    }
+
+    await fetch("https://weeding-backend.vercel.app/api/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(selected),
+    })
+
+    toast.success(`${selected.length} invités importés`)
+    setImportOpen(false)
+    fetchGuests()
+  }
+
+  // ================= RENDER =================
+  return (
+    <div className="min-h-screen bg-neutral-100 flex justify-center py-10 px-4">
       <Card className="w-full max-w-6xl p-6 space-y-6 shadow-xl">
-        {/* HEADER ACTIONS */}
+        {/* TITLE */}
+        <div className="text-center">
+          <h1 className="text-4xl font-serif font-semibold">
+            Liste des invités
+          </h1>
+          <p className="text-gray-500">Michelle & Patrick</p>
+        </div>
+
+        {/* ACTIONS EXISTANTES */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex gap-2">
             <Button
               variant="outline"
               onClick={fetchGuests}
               disabled={loading}
-              className="flex gap-2"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4 mr-2" />
               Rafraîchir
             </Button>
 
             <Button
               onClick={exportPDF}
-              className="flex gap-2"
               disabled={filteredGuests.length === 0}
             >
-              <FileText className="w-4 h-4" />
+              <FileText className="w-4 h-4 mr-2" />
               Export PDF
             </Button>
           </div>
 
-          <div className="text-sm text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             Total affiché : {filteredGuests.length}
+          </span>
+        </div>
+
+        {/* FILTRES + IMPORT XLS */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              className="sm:w-72"
+              placeholder="Rechercher par nom ou téléphone..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+
+            {/* BOUTON IMPORT XLS */}
+            <Button
+              variant="outline"
+              onClick={() =>
+                document.getElementById("xls-import").click()
+              }
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Importer le fichier xls
+            </Button>
+
+            {/* INPUT FILE CACHÉ */}
+            <input
+              type="file"
+              accept=".xls,.xlsx"
+              hidden
+              id="xls-import"
+              onChange={handleXlsFile}
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Présence" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="yes">Présents</SelectItem>
+                <SelectItem value="no">Absents</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={String(rowsPerPage)}
+              onValueChange={v => setRowsPerPage(Number(v))}
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Lignes / page" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5 / page</SelectItem>
+                <SelectItem value="10">10 / page</SelectItem>
+                <SelectItem value="20">20 / page</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* FILTRES */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Input
-            placeholder="Rechercher par nom ou téléphone..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filtrer" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous</SelectItem>
-              <SelectItem value="yes">Présents</SelectItem>
-              <SelectItem value="no">Absents</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* TABLE */}
+        {/* TABLEAU */}
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
@@ -176,7 +294,7 @@ export default function ListGuests() {
             </TableHeader>
 
             <TableBody>
-              {filteredGuests.length === 0 && (
+              {paginatedGuests.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-10">
                     Aucun invité trouvé
@@ -184,52 +302,36 @@ export default function ListGuests() {
                 </TableRow>
               )}
 
-              {filteredGuests.map(guest => (
-                <TableRow key={guest.id}>
-                  <TableCell className="font-medium">
-                    {guest.name}
-                  </TableCell>
-                  <TableCell>{guest.phone}</TableCell>
-
+              {paginatedGuests.map(g => (
+                <TableRow key={g.id}>
+                  <TableCell className="font-medium">{g.name}</TableCell>
+                  <TableCell>{g.phone}</TableCell>
                   <TableCell>
-                    {guest.is_attending ? (
-                      <Badge className="bg-green-600">Présent</Badge>
-                    ) : (
-                      <Badge variant="destructive">Absent</Badge>
-                    )}
+                    <Badge
+                      className={
+                        g.is_attending ? "bg-green-600" : "bg-red-600"
+                      }
+                    >
+                      {g.is_attending ? "Présent" : "Absent"}
+                    </Badge>
                   </TableCell>
-
-                  <TableCell>{guest.guests_count}</TableCell>
-
+                  <TableCell>{g.guests_count}</TableCell>
                   <TableCell>
-                    {new Date(guest.created_at).toLocaleDateString()}
+                    {new Date(g.created_at).toLocaleDateString()}
                   </TableCell>
-
                   <TableCell className="text-right space-x-2">
-                    {guest.message && (
+                    {g.message && (
                       <Button
                         size="icon"
                         variant="outline"
                         onClick={() =>
-                          toast.info("Message", {
-                            description: guest.message,
-                          })
+                          toast.info("Message", { description: g.message })
                         }
                       >
                         <MessageCircle className="w-4 h-4" />
                       </Button>
                     )}
-
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      onClick={() =>
-                        toast.warning("erreur", {
-                          description:
-                            "quelque chose n'a pas fonctionné",
-                        })
-                      }
-                    >
+                    <Button size="icon" variant="destructive">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </TableCell>
@@ -238,7 +340,41 @@ export default function ListGuests() {
             </TableBody>
           </Table>
         </div>
+
+        {/* PAGINATION */}
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-muted-foreground">
+            Page {currentPage} sur {totalPages || 1}
+          </span>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(p => p - 1)}
+            >
+              Précédent
+            </Button>
+
+            <Button
+              variant="outline"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage(p => p + 1)}
+            >
+              Suivant
+            </Button>
+          </div>
+        </div>
       </Card>
+
+      {/* MODAL IMPORT XLS */}
+      <ImportGuestsModal
+        open={importOpen}
+        guests={importGuests}
+        onClose={() => setImportOpen(false)}
+        onToggle={toggleImportGuest}
+        onImport={importSelectedGuests}
+      />
     </div>
   )
 }
