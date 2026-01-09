@@ -357,7 +357,7 @@ const handleSubmit = (e) => {
                                     <Label htmlFor="fullName">Nom complet</Label>
                                     <Input
                                         id="fullName"
-                                        placeholder="Votre nom complet"
+                                        placeholder=""
                                         value={formData.fullName}
                                         onChange={(e) => handleChange("fullName", e.target.value)}
                                         required
