@@ -11,55 +11,55 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner";
 function SavetheDate() {
 
-  const [formData, setFormData] = useState({
-  fullName: "",
-  phone: "",
-  message: ""
-});
-
-const handleChange = (field, value) => {
-  setFormData((prev) => ({
-    ...prev,
-    [field]: value
-  }));
-};
-
-const handleSubmit = (e) => {
-  e.preventDefault();
-
-  if (!formData.fullName.trim()) {
-    toast.error("Veuillez saisir votre nom complet");
-    return;
-  }
-
-  if (!formData.phone || formData.phone.length < 8) {
-    toast.error("Veuillez saisir un numéro de téléphone valide");
-    return;
-  }
-
-  if (!formData.message.trim()) {
-    toast.error("Veuillez écrire un message aux mariés");
-    return;
-  }
-
-  try {
-    console.log("Form submitted:", formData);
-
-    toast.success("Merci pour votre message ", {
-      description: "Vos vœux ont bien été envoyés aux mariés."
+    const [formData, setFormData] = useState({
+        fullName: "",
+        phone: "",
+        message: ""
     });
 
-    setFormData({
-      fullName: "",
-      phone: "",
-      message: ""
-    });
-  } catch (error) {
-    toast.error("Une erreur est survenue", {
-      description: "Veuillez réessayer plus tard."
-    });
-  }
-};
+    const handleChange = (field, value) => {
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        if (!formData.fullName.trim()) {
+            toast.error("Veuillez saisir votre nom complet");
+            return;
+        }
+
+        if (!formData.phone || formData.phone.length < 8) {
+            toast.error("Veuillez saisir un numéro de téléphone valide");
+            return;
+        }
+
+        if (!formData.message.trim()) {
+            toast.error("Veuillez écrire un message aux mariés");
+            return;
+        }
+
+        try {
+            console.log("Form submitted:", formData);
+
+            toast.success("Merci pour votre message ", {
+                description: "Vos vœux ont bien été envoyés aux mariés."
+            });
+
+            setFormData({
+                fullName: "",
+                phone: "",
+                message: ""
+            });
+        } catch (error) {
+            toast.error("Une erreur est survenue", {
+                description: "Veuillez réessayer plus tard."
+            });
+        }
+    };
     const qrLink = "https://votre-lien-de-partage.com"
     const targetDate = new Date("2026-01-31T00:00:00");
 
@@ -213,25 +213,43 @@ const handleSubmit = (e) => {
                     </div>
                 </div>
             </section>
-            <section className="w-full bg-white py-10">
-                <div className="flex flex-col items-center justify-center py-16 bg-white px-6">
-                    <h3 className="mb-8 text-3xl text-center font-light tracking-[0.3em] text-emerald-900">
+            <section className="w-full bg-white py-16">
+                <div className="flex flex-col items-center justify-center px-6 text-center">
+
+                    <h3 className="mb-6 text-3xl font-light tracking-[0.35em] text-emerald-900">
                         Nos Couleurs de Mariage
                     </h3>
 
-                    <p className="text-center text-gray-700 mb-12 max-w-lg">
-                        Chaque couleur reflète un morceau de notre histoire et de notre amour.
-                        Le vert émeraude symbolise l’élégance, l’harmonie et la sérénité. C’est la couleur de la nature, du renouveau et de l’espoir, reflétant la profondeur de notre amour et la promesse d’un futur lumineux et serein ensemble
+                    <p className="mb-12 max-w-2xl text-gray-700 leading-relaxed">
+                        Chaque couleur choisie raconte une partie de notre histoire.
+                        Le <span className="font-medium text-emerald-700">vert émeraude</span> incarne l’élégance,
+                        l’harmonie et l’espoir d’un amour qui grandit chaque jour.
+                        L’<span className="font-medium text-orange-500">orange</span> symbolise la joie,
+                        la chaleur et l’énergie qui illuminent notre union.
                     </p>
 
-                    <div className="flex space-x-6">
+                    <div className="flex flex-col sm:flex-row gap-10">
+
+                        {/* Vert Émeraude */}
                         <div className="flex flex-col items-center">
-                            <div className="w-24 h-24 rounded-full bg-emerald-600 shadow-lg"></div>
-                            <span className="mt-4 text-sm font-medium text-emerald-700">Vert Émeraude</span>
+                            <div className="w-24 h-24 rounded-full bg-emerald-600 shadow-xl ring-4 ring-emerald-200"></div>
+                            <span className="mt-4 text-sm font-semibold uppercase tracking-wide text-emerald-700">
+                                Vert Émeraude
+                            </span>
                         </div>
+
+                        {/* Orange */}
+                        <div className="flex flex-col items-center">
+                            <div className="w-24 h-24 rounded-full bg-orange-500 shadow-xl ring-4 ring-orange-200"></div>
+                            <span className="mt-4 text-sm font-semibold uppercase tracking-wide text-orange-600">
+                                Orange
+                            </span>
+                        </div>
+
                     </div>
                 </div>
             </section>
+
             <div className="mx-auto max-w-7xl px-6">
                 <h2 className="mb-12 inline-block bg-emerald-900 px-4 py-2 text-2xl font-bold tracking-wide text-white">
                     Notre Histoire
@@ -360,7 +378,7 @@ const handleSubmit = (e) => {
                                         placeholder=""
                                         value={formData.fullName}
                                         onChange={(e) => handleChange("fullName", e.target.value)}
-                                        required
+                                        
                                     />
                                 </div>
 
@@ -373,7 +391,6 @@ const handleSubmit = (e) => {
                                         inputProps={{
                                             id: "phone",
                                             name: "phone",
-                                            required: true,
                                             className:
                                                 "w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                         }}
@@ -387,7 +404,7 @@ const handleSubmit = (e) => {
                                         placeholder=""
                                         value={formData.message}
                                         onChange={(e) => handleChange("message", e.target.value)}
-                                        required
+                                        
                                     />
                                 </div>
 
