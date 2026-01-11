@@ -9,58 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner";
+import PageLoader from "./Loader";
 function SavetheDate() {
 
-    const [formData, setFormData] = useState({
-        fullName: "",
-        phone: "",
-        message: ""
-    });
+    const [loading, setLoading] = useState(true);
 
-    const handleChange = (field, value) => {
-        setFormData((prev) => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        if (!formData.fullName.trim()) {
-            toast.error("Veuillez saisir votre nom complet");
-            return;
-        }
-
-        if (!formData.phone || formData.phone.length < 8) {
-            toast.error("Veuillez saisir un numéro de téléphone valide");
-            return;
-        }
-
-        if (!formData.message.trim()) {
-            toast.error("Veuillez écrire un message aux mariés");
-            return;
-        }
-
-        try {
-            console.log("Form submitted:", formData);
-
-            toast.success("Merci pour votre message ", {
-                description: "Vos vœux ont bien été envoyés aux mariés."
-            });
-
-            setFormData({
-                fullName: "",
-                phone: "",
-                message: ""
-            });
-        } catch (error) {
-            toast.error("Une erreur est survenue", {
-                description: "Veuillez réessayer plus tard."
-            });
-        }
-    };
-    const qrLink = "https://votre-lien-de-partage.com"
+    const qrLink = "https://app.eventpics.net/9ZbFISBaMfES"
     const targetDate = new Date("2026-01-31T00:00:00");
 
     const [timeLeft, setTimeLeft] = useState(getTimeLeft());
@@ -84,6 +38,13 @@ function SavetheDate() {
 
         return { years, months, days, hours, minutes, seconds };
     }
+useEffect(() => {
+  const timeout = setTimeout(() => {
+    setLoading(false);
+  }, 5000);
+
+  return () => clearTimeout(timeout);
+}, []);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -92,6 +53,9 @@ function SavetheDate() {
 
         return () => clearInterval(timer);
     }, []);
+if (loading) {
+  return <PageLoader />;
+}
 
     return (
         <>
@@ -137,9 +101,9 @@ function SavetheDate() {
                             alt="Bon Enfant & Alexis Lionel"
                             className="h-full w-full object-cover grayscale "
                         />
-                        <div className="absolute top-19 left-16 text-emerald-900 text-xl font-serif">
+                        <div className="absolute top-19 left-19 text-emerald-900 text-xl font-serif text-center">
                             <h1 className="text-4xl  font-fancy tracking-wide">
-                                Michelle & Patrick
+                                Claude Michelle <br />&<br /> Patrick Orsel
                             </h1>
                         </div>
                     </div>
@@ -165,17 +129,18 @@ function SavetheDate() {
                             </h3>
 
                             <p className="mb-6 text-xl">31 Janvier 2026</p>
-                            <p className="mb-6 text-lg">11:00</p>
-
-                            <p className="mb-8 max-w-md text-sm leading-relaxed text-emerald-900">
-                                10 Rue Saint-Antoine E, Montréal, QC H2Y 1B5, Canada
-                            </p>
+                            <p className="mb-6 text-lg">10:00</p>
 
                             <div className="flex flex-col gap-3 text-sm text-emerald-900">
-                                <a href="#" className="hover:underline">
+                                <a
+                                    href="/mariage.ics"
+                                    download
+                                    className="hover:underline cursor-pointer"
+                                >
                                     Ajouter au calendrier
                                 </a>
                             </div>
+
                         </div>
 
                     </div>
@@ -196,33 +161,50 @@ function SavetheDate() {
                                 RECEPTION
                             </h3>
 
-                            <p className="mb-6 text-xl">01 Janvier 2026</p>
-                            <p className="mb-6 text-lg">19:00 - 03:00</p>
+                            <p className="mb-6 text-xl">31 Janvier 2026</p>
+                            <p className="mb-6 text-lg">18:00 - 03:00</p>
 
                             <p className="mb-8 max-w-md text-sm leading-relaxed text-emerald-900">
-                                10 Rue Saint-Antoine E, Montréal, QC H2Y 1B5, Canada
+                                Salle de reception  Shapla Venue <br />
+                                2222A , Avenue Dollard,LaSalle, QC H8N 1S6
                             </p>
 
                             <div className="flex flex-col gap-3 text-sm text-emerald-900">
-                                <a href="#" className="hover:underline">
+                                <a
+                                    href="/mariage.ics"
+                                    download
+                                    className="hover:underline cursor-pointer"
+                                >
                                     Ajouter au calendrier
                                 </a>
                             </div>
+
                         </div>
 
                     </div>
                 </div>
             </section>
-            <section className="w-full bg-white py-16">
+            <section className="w-full bg-white py-10">
+                <div className="mx-auto max-w-7xl px-6">
+                    <h2 className="mb-12 inline-block bg-emerald-900 px-4 py-2 text-2xl font-bold tracking-wide text-white">
+                        Code vestimentaire
+                    </h2>
+                    <p className=" text-justify">
+                        Votre présence est la chose la plus importante pour nous !
+                        Mais nous vous serions très reconnaissants de soutenir le schéma de couleurs de notre mariage !
+                    </p>
+                </div>
+            </section>
+            <section className="w-full bg-white py-6">
                 <div className="flex flex-col items-center justify-center px-6 text-center">
 
                     <h3 className="mb-6 text-3xl font-light tracking-[0.35em] text-emerald-900">
                         Nos Couleurs de Mariage
                     </h3>
 
-                    <p className="mb-12 max-w-2xl text-gray-700 leading-relaxed">
+                    <p className="mb-12 max-w-2xl text-gray-700  text-justify leading-relaxed">
                         Chaque couleur choisie raconte une partie de notre histoire.
-                        Le <span className="font-medium text-emerald-700">vert émeraude</span> incarne l’élégance,
+                        Le <span className="font-medium text-emerald-900">vert émeraude</span> incarne l’élégance,
                         l’harmonie et l’espoir d’un amour qui grandit chaque jour.
                         L’<span className="font-medium text-orange-500">orange</span> symbolise la joie,
                         la chaleur et l’énergie qui illuminent notre union.
@@ -232,7 +214,7 @@ function SavetheDate() {
 
                         {/* Vert Émeraude */}
                         <div className="flex flex-col items-center">
-                            <div className="w-24 h-24 rounded-full bg-emerald-600 shadow-xl ring-4 ring-emerald-200"></div>
+                            <div className="w-24 h-24 rounded-full bg-emerald-900 shadow-xl ring-4 ring-emerald-800"></div>
                             <span className="mt-4 text-sm font-semibold uppercase tracking-wide text-emerald-700">
                                 Vert Émeraude
                             </span>
@@ -268,38 +250,17 @@ function SavetheDate() {
                         />
                     </div>
                     <p className="text-gray-700 mb-12 text-lg text-italic leading-relaxed">
-                        Découvrez comment tout a commencé, le premier sourire et les moments inoubliables qui ont marqué notre histoire.
+                        Découvrez comment tout a commencé, C’est une rencontre devenue un lien , un lien devenu une promesse.
+                        Voici l’histoire de deux âmes qui ont choisi de marcher ensemble, aujourd’hui et pour toujours.
                     </p>
                     <Accordion type="single" collapsible className="w-full text-left" defaultValue="premier-regard">
                         <AccordionItem value="premier-regard">
-                            <AccordionTrigger>Le Premier Regard</AccordionTrigger>
+                            <AccordionTrigger>Notre Histoire</AccordionTrigger>
                             <AccordionContent className="flex flex-col gap-4 text-gray-700">
-                                <p>
-                                    C'était un jour ensoleillé, et nos chemins se sont croisés par hasard.
-                                </p>
-                                <p>
-                                    Un sourire, un échange de regards, et nous savions que quelque chose de spécial venait de commencer.
-                                </p>
-                            </AccordionContent>
-                        </AccordionItem>
+                                <p className="text-justify">
+                                    Tout remonte il y’a 12 années aujourd’hui, la première rencontre s’est faite en Décembre 2014. Michelle arrivait à l’université de Dschang pour ses études supérieures à la Faculté d’agronomie et des sciences agricoles (FASA). C’était le début d’une vie nouvelle, loin de sa famille, il fallait apprendre à être responsable, vivre seule et surtout réussir ses études. À cette époque là, Patrick, était déjà à l’université de Dschang quelques années avant Michelle. Tous les deux vivaient dans la même cité nommée &laquo; MANDELA CITY &raquo;, même corridor, chambre voisine. Michelle était encore jeune, et voulait pleinement profiter de son adolescence; Patrick, très posé, discret, intelligent, avait déjà ciblé la femme avec qui il souhaitait partager sa vie. Tous les deux complices, aucune relation ne s’est créé en ce moment là; ils s’étaient limités aux relations de bons voisinage; mais notons que, quelques fois, Patrick cuisinait de bon repas et invitait Michelle à dîner avec lui dans sa chambre d’étudiant. Quelques années plus tard, Michelle et Patrick quittaient la ville de Dschang, tous les deux couronnés d’un diplôme 🎓 d’ingénieur. C’est ainsi que Patrick poursuit ses études en Belgique. À chaque fois qu’il changeait de numéro de téléphone, il contactait Michelle pour passer son nouveau cellulaire. Chacun d’eux prenaient les nouvelles de l’autre au quotidien.  En Décembre 2022, Patrick demande à connaître davantage Michelle avec pour objectif de construire une vie commune : C’est le début d’une belle histoire d’amour. Avec la grâce de Dieu, Michelle Rejoind Patrick en Belgique en 2023; c’est le moment pour eux de se connaître davantage et se projetter pour l’avenir.  Une fois en Belgique, Michelle est appelée à des nouvelles opportunités de vie, du côté du Canada; une nouvelle distance qui se crée; mais rien ne s’éteint parceque ce qui leur unis est plus fort. Le Seigneur accomplit de grande chose, Patrick obtient à son tour le visa pour le Canada, c’est donc le moment pour les deux, de consolider leur union. Ce que nous gardons du couple aujourd’hui, c’est que la vie nous réserve beaucoup de surprises, la distance ne sépare pas des personnes  qui s’aiment. <br /><br />
 
-                        <AccordionItem value="premier-rendezvous">
-                            <AccordionTrigger>Le Premier Rendez-vous</AccordionTrigger>
-                            <AccordionContent className="flex flex-col gap-4 text-gray-700">
-                                <p>
-                                    Après quelques échanges, nous avons décidé de nous revoir.
-                                </p>
-                                <p>
-                                    Ce premier rendez-vous était rempli de rires, de conversations profondes et de complicité instantanée.
-                                </p>
-                            </AccordionContent>
-                        </AccordionItem>
-
-                        <AccordionItem value="premiers-souvenirs">
-                            <AccordionTrigger>Les Premiers Souvenirs</AccordionTrigger>
-                            <AccordionContent className="flex flex-col gap-4 text-gray-700">
-                                <p>
-                                    Ensemble, nous avons partagé nos premiers voyages, nos premiers projets et chaque moment nous rapprochait davantage, jusqu’à aujourd’hui.
+                                    Ce 31 Janvier 2026, ils se diront OUI pour la vie❤️
                                 </p>
                             </AccordionContent>
                         </AccordionItem>
@@ -322,7 +283,7 @@ function SavetheDate() {
 
                     <div className="relative md:w-1/2 flex justify-center">
                         <img
-                            src="/images.png"
+                            src="/qrcode.png"
                             alt="QR Code Mariage"
                             className="w-84 h-84 object-cover rounded-lg shadow-lg"
                         />
@@ -354,64 +315,45 @@ function SavetheDate() {
                                 Vous pouvez participer au cadeau des mariés ou leur apporter votre soutien financier pour les aider à commencer leur nouvelle vie ensemble.
                             </p>
                             <ul className="list-disc list-inside space-y-2">
-                                <li>Virement bancaire : 000-111-222</li>
-                                <li>Paypal : mariés@exemple.com</li>
-                                <li>Autres contributions : contactez-nous</li>
+                                <li>
+                                    Virement Intérac : <br />
+                                    Michelle (dépôt direct){" "}
+                                    <a
+                                        href="tel:+14385351569"
+                                        className="underline text-emerald-900 hover:text-blue-800"
+                                    >
+                                        438-535-1569
+                                    </a>
+                                    <br />
+                                    Patrick{" "}
+                                    <a
+                                        href="mailto:Patrickouonkap@yahoo.com"
+                                        className="underline text-emerald-900 hover:text-blue-800"
+                                    >
+                                        Patrickouonkap@yahoo.com
+                                    </a>
+                                </li>
+
+                                <li>
+                                    Virement Orange Money :{" "}
+                                    <a
+                                        href="tel:+237699337378"
+                                        className="underline text-emerald-900 hover:text-blue-800"
+                                    ><br />
+                                        (+237) 699 337 378
+                                    </a>
+                                </li>
+
+                                <li>
+                                    Autres contributions :{" "}
+                                    <a
+                                        href="mailto:Patrickouonkap@yahoo.com"
+                                        className="underline text-emerald-900 hover:text-blue-800"
+                                    >
+                                        contactez-nous
+                                    </a>
+                                </li>
                             </ul>
-                        </CardContent>
-                    </Card>
-                    <img
-                        src="/save.jpg"
-                        alt="Photo des mariés"
-                        className="lg:w-1/3 w-full bg-white shadow-lg flex justify-center items-center p-6  "
-                    />
-                    <Card className="lg:w-1/3 w-full bg-white shadow-lg">
-                        <CardHeader>
-                            <CardTitle>Laissez un message aux mariés</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <form className="space-y-6" onSubmit={handleSubmit}>
-                                <div className="space-y-2">
-                                    <Label htmlFor="fullName">Nom complet</Label>
-                                    <Input
-                                        id="fullName"
-                                        placeholder=""
-                                        value={formData.fullName}
-                                        onChange={(e) => handleChange("fullName", e.target.value)}
-                                        
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="phone">Numéro de téléphone</Label>
-                                    <PhoneInput
-                                        country={"ca"}
-                                        value={formData.phone}
-                                        onChange={(value) => handleChange("phone", value)}
-                                        inputProps={{
-                                            id: "phone",
-                                            name: "phone",
-                                            className:
-                                                "w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="message">Message</Label>
-                                    <Textarea
-                                        id="message"
-                                        placeholder=""
-                                        value={formData.message}
-                                        onChange={(e) => handleChange("message", e.target.value)}
-                                        
-                                    />
-                                </div>
-
-                                <Button type="submit" className="w-full">
-                                    Envoyer
-                                </Button>
-                            </form>
 
                         </CardContent>
                     </Card>
