@@ -81,7 +81,7 @@ function App() {
     // Affichage du toast avec loader automatique
     toast.promise(uploadPromise, {
       loading: "Envoi de votre photo en cours...",
-      success: "Félicitations ! Votre photo est en ligne 📸",
+      success: "Félicitations ! Votre photo est en ligne",
       error: "Oups, l'envoi a échoué. Réessayez !",
     });
   };
