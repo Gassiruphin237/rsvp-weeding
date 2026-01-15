@@ -14,7 +14,8 @@ function SavetheDate() {
 
     const [loading, setLoading] = useState(true);
 
-    const qrLink = "https://app.eventpics.net/9ZbFISBaMfES"
+    const qrLink2= "https://app.eventpics.net/9ZbFISBaMfES"
+    const qrLink = "https://michelle-et-patrick.vercel.app/gallery"
     const targetDate = new Date("2026-01-31T00:00:00");
 
     const [timeLeft, setTimeLeft] = useState(getTimeLeft());
@@ -283,7 +284,7 @@ if (loading) {
 
                     <div className="relative md:w-1/2 flex justify-center">
                         <img
-                            src="/qrcode.png"
+                            src="/qrcode2.png"
                             alt="QR Code Mariage"
                             className="w-84 h-84 object-cover rounded-lg shadow-lg"
                         />
