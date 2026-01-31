@@ -23,16 +23,26 @@ function App() {
 
   // Charger les images depuis notre serveur 
   useEffect(() => {
+    // const fetchImages = async () => {
+    //   try {
+    //     const res = await fetch("https://weeding-backend.vercel.app/api/images");
+    //     const data = await res.json();
+    //     setItems(data);
+    //   } catch (err) {
+    //     console.error("Erreur chargement images :", err);
+    //     toast.error("Impossible de charger les images");
+    //   }
+    // };
     const fetchImages = async () => {
-      try {
-        const res = await fetch("https://weeding-backend.vercel.app/api/images");
-        const data = await res.json();
-        setItems(data);
-      } catch (err) {
-        console.error("Erreur chargement images :", err);
-        toast.error("Impossible de charger les images");
-      }
-    };
+  try {
+    // On ajoute ?t= + le temps actuel pour forcer la mise à jour
+    const res = await fetch(`https://weeding-backend.vercel.app/api/images?t=${new Date().getTime()}`);
+    const data = await res.json();
+    setItems(data);
+  } catch (err) {
+    console.error("Erreur :", err);
+  }
+};
 
     fetchImages();
   }, []);

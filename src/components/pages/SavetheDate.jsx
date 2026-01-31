@@ -14,7 +14,7 @@ function SavetheDate() {
 
     const [loading, setLoading] = useState(true);
 
-    const qrLink2= "https://app.eventpics.net/9ZbFISBaMfES"
+    const qrLink2 = "https://app.eventpics.net/9ZbFISBaMfES"
     const qrLink = "https://michelle-et-patrick.vercel.app/gallery"
     const targetDate = new Date("2026-01-31T00:00:00");
 
@@ -24,28 +24,27 @@ function SavetheDate() {
         const now = new Date();
         const difference = targetDate - now;
 
+        // Si la différence est négative ou nulle, c'est le grand jour !
+        if (difference <= 0) {
+            return { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0, isTargetDay: true };
+        }
+
         const years = Math.floor(difference / (1000 * 60 * 60 * 24 * 365));
-        const months = Math.floor(
-            (difference % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30)
-        );
-        const days = Math.floor(
-            (difference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24)
-        );
-        const hours = Math.floor(
-            (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        );
+        const months = Math.floor((difference % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
+        const days = Math.floor((difference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-        return { years, months, days, hours, minutes, seconds };
+        return { years, months, days, hours, minutes, seconds, isTargetDay: false };
     }
-useEffect(() => {
-  const timeout = setTimeout(() => {
-    setLoading(false);
-  }, 5000);
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setLoading(false);
+        }, 5000);
 
-  return () => clearTimeout(timeout);
-}, []);
+        return () => clearTimeout(timeout);
+    }, []);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -54,9 +53,9 @@ useEffect(() => {
 
         return () => clearInterval(timer);
     }, []);
-if (loading) {
-  return <PageLoader />;
-}
+    if (loading) {
+        return <PageLoader />;
+    }
 
     return (
         <>
@@ -67,32 +66,40 @@ if (loading) {
                             <h2 className="mb-6 font-serif text-3xl">Ils se disent OUI</h2>
                             <p className="font-serif text-lg">Montréal, CANADA</p>
                         </div>
-                        <div className="flex space-x-6 text-center">
-                            <div>
-                                <span className="block text-2xl font-bold">{timeLeft.years}</span>
-                                <span className="text-sm">Années</span>
+                        {timeLeft.isTargetDay ? (
+                            <div className="animate-bounce">
+                                <h2 className="text-2xl font-serif font-bold text-white-400">
+                                    Félicitations, le grand jour est arrivé !
+                                </h2>
                             </div>
-                            <div>
-                                <span className="block text-2xl font-bold">{timeLeft.months}</span>
-                                <span className="text-sm">Mois</span>
+                        ) : (
+                            <div className="flex space-x-6 text-center">
+                                <div>
+                                    <span className="block text-2xl font-bold">{timeLeft.years}</span>
+                                    <span className="text-sm">Années</span>
+                                </div>
+                                <div>
+                                    <span className="block text-2xl font-bold">{timeLeft.months}</span>
+                                    <span className="text-sm">Mois</span>
+                                </div>
+                                <div>
+                                    <span className="block text-2xl font-bold">{timeLeft.days}</span>
+                                    <span className="text-sm">Jours</span>
+                                </div>
+                                <div>
+                                    <span className="block text-2xl font-bold">{timeLeft.hours}</span>
+                                    <span className="text-sm">Heures</span>
+                                </div>
+                                <div>
+                                    <span className="block text-2xl font-bold">{timeLeft.minutes}</span>
+                                    <span className="text-sm">Minutes</span>
+                                </div>
+                                <div>
+                                    <span className="block text-2xl font-bold">{timeLeft.seconds}</span>
+                                    <span className="text-sm">Secondes</span>
+                                </div>
                             </div>
-                            <div>
-                                <span className="block text-2xl font-bold">{timeLeft.days}</span>
-                                <span className="text-sm">Jours</span>
-                            </div>
-                            <div>
-                                <span className="block text-2xl font-bold">{timeLeft.hours}</span>
-                                <span className="text-sm">Heures</span>
-                            </div>
-                            <div>
-                                <span className="block text-2xl font-bold">{timeLeft.minutes}</span>
-                                <span className="text-sm">Minutes</span>
-                            </div>
-                            <div>
-                                <span className="block text-2xl font-bold">{timeLeft.seconds}</span>
-                                <span className="text-sm">Secondes</span>
-                            </div>
-                        </div>
+                        )}
                     </div>
 
                     {/*  IMAGE */}
@@ -258,7 +265,7 @@ if (loading) {
                         <AccordionItem value="premier-regard">
                             <AccordionTrigger className="text-xl">Notre Histoire</AccordionTrigger>
                             <AccordionContent className="flex flex-col  gap-4 text-gray-700">
-                                <p className="text-justify text-xl">
+                                <p className="text-justify text-sm">
                                     Tout remonte il y’a 12 années aujourd’hui, la première rencontre s’est faite en Décembre 2014. Michelle arrivait à l’université de Dschang pour ses études supérieures à la Faculté d’agronomie et des sciences agricoles (FASA). C’était le début d’une vie nouvelle, loin de sa famille, il fallait apprendre à être responsable, vivre seule et surtout réussir ses études. À cette époque là, Patrick, était déjà à l’université de Dschang quelques années avant Michelle. Tous les deux vivaient dans la même cité nommée &laquo; MANDELA CITY &raquo;, même corridor, chambre voisine. Michelle était encore jeune, et voulait pleinement profiter de son adolescence; Patrick, très posé, discret, intelligent, avait déjà ciblé la femme avec qui il souhaitait partager sa vie. Tous les deux complices, aucune relation ne s’est créé en ce moment là; ils s’étaient limités aux relations de bons voisinage; mais notons que, quelques fois, Patrick cuisinait de bon repas et invitait Michelle à dîner avec lui dans sa chambre d’étudiant. Quelques années plus tard, Michelle et Patrick quittaient la ville de Dschang, tous les deux couronnés d’un diplôme d’ingénieur. C’est ainsi que Patrick poursuit ses études en Belgique. À chaque fois qu’il changeait de numéro de téléphone, il contactait Michelle pour passer son nouveau cellulaire. Chacun d’eux prenaient les nouvelles de l’autre au quotidien.  En Décembre 2022, Patrick demande à connaître davantage Michelle avec pour objectif de construire une vie commune : C’est le début d’une belle histoire d’amour. Avec la grâce de Dieu, Michelle Rejoind Patrick en Belgique en 2023; c’est le moment pour eux de se connaître davantage et se projetter pour l’avenir.  Une fois en Belgique, Michelle est appelée à des nouvelles opportunités de vie, du côté du Canada; une nouvelle distance qui se crée; mais rien ne s’éteint parceque ce qui leur unis est plus fort. Le Seigneur accomplit de grande chose, Patrick obtient à son tour le visa pour le Canada, c’est donc le moment pour les deux, de consolider leur union. Ce que nous gardons du couple aujourd’hui, c’est que la vie nous réserve beaucoup de surprises, la distance ne sépare pas des personnes  qui s’aiment. <br /><br />
 
                                     Ce 31 Janvier 2026, ils se diront OUI pour la vie❤️
